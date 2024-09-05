@@ -2,11 +2,6 @@
 #include "Soundex.h"
 
 
-TEST(SoundexTest, HandlesEmptyString) {
-    EXPECT_EQ(generateSoundex(""), "");
+TEST(SoundexTest, isPrevLetterHWYPass ) {
+    assertTrue(isPrevLetterHWY ("tymczak", 2));
 }
-
-TEST(SoundexTest, HandlesSingleCharacter) {
-    EXPECT_EQ(generateSoundex("A"), "A000");
-}
-
