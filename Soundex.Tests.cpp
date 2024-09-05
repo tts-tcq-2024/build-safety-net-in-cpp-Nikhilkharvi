@@ -2,7 +2,7 @@
 #include "Soundex.h"
 #include "Soundex.cpp"
 
-TEST_F(IsPrevLetterHWYTest, ReturnsFalseForNonHWY) {
+TEST_F(SoundexTest, isPrevLetterHWYPass) {
   std::string name = "Tymczak";
   size_t i = 2;
   bool result = isPrevLetterHWY(name, i);
