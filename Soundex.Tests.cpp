@@ -3,5 +3,5 @@
 
 
 TEST(SoundexTest, isPrevLetterHWYPass ) {
-    assertTrue(isPrevLetterHWY ("tymczak", 2));
+    EXPECT_TRUE(isPrevLetterHWY ("tymczak", 2));
 }
