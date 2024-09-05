@@ -1,82 +1,116 @@
-#include <iostream>
-#include <string>
+#include <gtest/gtest.h>
 #include "Soundex.h"
-#include <cctype>
-#include <map>
-using namespace std;
  
-bool isPrevLetterHWY(const std::string& name, size_t& i) {
-  return (name[i-1] == 'H' || name[i-1] == 'W' || name[i-1] == 'Y');
+// Test for isPrevLetterHWY
+TEST(SoundexTest, IsPrevLetterHWY) {
+    std::string name = "HWY";
+    size_t index = 1;
+    EXPECT_TRUE(isPrevLetterHWY(name, index));
+    name = "HAPPY";
+    index = 2;
+    EXPECT_FALSE(isPrevLetterHWY(name, index));
 }
  
-char getSoundexCode(char c) {
-    std::map<char, char> soundexMap = {
-        {'A', '0'}, {'E', '0'}, {'I', '0'}, {'O', '0'}, {'U', '0'},
-        {'H', '0'}, {'W', '0'}, {'Y', '0'}, {'B', '1'}, {'F', '1'}, {'P', '1'}, {'V', '1'},
-        {'C', '2'}, {'G', '2'}, {'J', '2'}, {'K', '2'}, {'Q', '2'}, {'S', '2'}, {'X', '2'}, {'Z', '2'},
-        {'D', '3'}, {'T', '3'},
-        {'L', '4'},
-        {'M', '5'}, {'N', '5'},
-        {'R', '6'}
-    };
-    auto it = soundexMap.find(toupper(c));
-    return (it != soundexMap.end()) ? it->second : '0';
+// Test for getSoundexCode
+TEST(SoundexTest, GetSoundexCode) {
+    EXPECT_EQ(getSoundexCode('A'), '0');
+    EXPECT_EQ(getSoundexCode('B'), '1');
+    EXPECT_EQ(getSoundexCode('C'), '2');
+    EXPECT_EQ(getSoundexCode('D'), '3');
+    EXPECT_EQ(getSoundexCode('L'), '4');
+    EXPECT_EQ(getSoundexCode('M'), '5');
+    EXPECT_EQ(getSoundexCode('R'), '6');
+    EXPECT_EQ(getSoundexCode('X'), '2');
+    EXPECT_EQ(getSoundexCode('Z'), '2');
+    EXPECT_EQ(getSoundexCode('H'), '0');
+    EXPECT_EQ(getSoundexCode('W'), '0');
+    EXPECT_EQ(getSoundexCode('Y'), '0');
+    EXPECT_EQ(getSoundexCode('Q'), '2');
 }
  
-void generateSoundexForPrevLetterHWY(const std::string& name, size_t& i, std::string& soundex, char& lastCode) {
-             char currCode = getSoundexCode(name[i]);
-           if(lastCode != currCode) {
-               soundex += currCode;
-  }
+// Test for generateSoundexIfPrevLetterHWY
+TEST(SoundexTest, GenerateSoundexIfPrevLetterHWY) {
+    std::string name = "HWY";
+    size_t index = 2;
+    std::string soundex;
+    char lastCode = '0';
+    generateSoundexIfPrevLetterHWY(name, index, soundex, lastCode);
+    EXPECT_EQ(soundex, "");
 }
  
-void generateSoundexForCurrentLetter(const std::string& name, size_t& i, std::string& soundex, char& previousCode) {
-  if (getSoundexCode(name[i]) != '0' && getSoundexCode(name[i]) != previousCode) {
-    soundex += getSoundexCode(name[i]);
-  }
+// Test for generateSoundexIfPrevLetterNotHWY
+TEST(SoundexTest, GenerateSoundexIfPrevLetterNotHWY) {
+    std::string name = "ABCD";
+    size_t index = 1;
+    std::string soundex;
+    char previousCode = '0';
+    generateSoundexIfPrevLetterNotHWY(name, index, soundex, previousCode);
+    EXPECT_EQ(soundex, "1");
+ 
+    index = 2;
+    previousCode = '1';
+    generateSoundexIfPrevLetterNotHWY(name, index, soundex, previousCode);
+    EXPECT_EQ(soundex, "12");
 }
  
+// Test for makeSoundeLengthFour
+TEST(SoundexTest, MakeSoundeLengthFour) {
+    std::string soundex = "A";
+    makeSoundeLengthFour(soundex);
+    EXPECT_EQ(soundex, "A000");
  
-void handleSoundexLengthFour(std::string& soundex) {
-  while (soundex.length() < 4) {
-        soundex += '0';
-    }
+    soundex = "A123";
+    makeSoundeLengthFour(soundex);
+    EXPECT_EQ(soundex, "A123");
 }
  
-void generateSoundexForLetter(const std::string& name, size_t& i, std::string& soundex, char& previousCode, char& lastCode) {
-  if (isPrevLetterHWY(name, i)) {
-          generateSoundexForPrevLetterHWY(name, i, soundex, lastCode);
-        }
-        else {
-          generateSoundexForCurrentLetter(name, i, soundex, previousCode);
-        }
+// Test for generateSoundexForLetter
+TEST(SoundexTest, GenerateSoundexForLetter) {
+    std::string name = "ABCD";
+    size_t index = 1;
+    std::string soundex;
+    char previousCode = '0';
+    char lastCode = '0';
+ 
+    generateSoundexForLetter(name, index, soundex, previousCode, lastCode);
+    EXPECT_EQ(soundex, "1");
+ 
+    previousCode = '1';
+    lastCode = '1';
+    index = 2;
+    generateSoundexForLetter(name, index, soundex, previousCode, lastCode);
+    EXPECT_EQ(soundex, "12");
 }
  
-void handleSoundex(std::string& soundex, const std::string& name) {
-    char previousLetter = toupper(name[0]);
-    char previousCode = getSoundexCode(name[0]);
-    char lastLetter = toupper(name[0]);
-    char lastCode = getSoundexCode(name[0]);
-    for (size_t i = 1; i < name.length() && soundex.length() < 4; ++i) {
-      generateSoundexForLetter(name, i, soundex, lastCode, previousCode);
-        lastCode = previousCode;
-        previousCode = getSoundexCode(name[i]);
-    }
-}
- 
-std::string generateSoundex(const std::string& name) {
-    if (name.empty()) return "";
-    std::string soundex(1, toupper(name[0]));
+// Test for handleSoundex
+TEST(SoundexTest, HandleSoundex) {
+    std::string name = "Example";
+    std::string soundex;
+    soundex = "E";
     handleSoundex(soundex, name);
-    handleSoundexLengthFour(soundex);
-    return soundex;
+    EXPECT_EQ(soundex, "E251");
+ 
+    name = "Soundex";
+    soundex = "S";
+    handleSoundex(soundex, name);
+    EXPECT_EQ(soundex, "S532");
+ 
+    name = "HWY";
+    soundex.clear();
+    soundex = "H";
+    handleSoundex(soundex, name);
+    EXPECT_EQ(soundex, "H");
 }
-  
-int main() {
-std::string name;
-    std::cout << "Enter a name: ";
-    std::cin >> name;
-    std::string soundexCode = generateSoundex(name);
-    std::cout << "Soundex code for " << name << " is " << soundexCode << std::endl;
-    return 0;
+ 
+// Test for generateSoundex
+TEST(SoundexTest, GenerateSoundex) {
+    EXPECT_EQ(generateSoundex("Example"), "E251");
+    EXPECT_EQ(generateSoundex("Soundex"), "S532");
+    EXPECT_EQ(generateSoundex("HWY"), "H000");
+    EXPECT_EQ(generateSoundex(""), "");
+    EXPECT_EQ(generateSoundex("A"), "A000");
+    EXPECT_EQ(generateSoundex("Abcd"), "A123");
+    EXPECT_EQ(generateSoundex("pfister"), "P236");
+    EXPECT_EQ(generateSoundex("Honeyman"), "H555");
+    EXPECT_EQ(generateSoundex("Tymczak"), "T522");
 }
